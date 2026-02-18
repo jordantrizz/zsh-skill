@@ -90,10 +90,9 @@ while IFS= read -r line; do
         continue
     fi
     
-    # Match status line
+    # Match status line (don't add to content)
     if [[ $line =~ ^\*\*Status:\*\*\ (.+)$ ]]; then
         phase_statuses[$current_phase]="${BASH_REMATCH[1]}"
-        current_content+="$line"$'\n'
         continue
     fi
     
