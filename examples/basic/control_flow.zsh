@@ -57,7 +57,7 @@ echo
 echo ""
 echo "  Brace expansion:"
 for n in {1..5}; do
-    printf "  %d" $n
+    printf "  %d" "$n"
 done
 echo
 
