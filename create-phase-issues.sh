@@ -158,20 +158,26 @@ for phase in "${phase_order[@]}"; do
         echo "  Content length: ${#content} chars"
         echo ""
     else
-        echo "$issue_body" | gh issue create \
-            --repo "$REPO" \
-            --title "$issue_title" \
-            --body-file - \
-            --label "$labels" && {
-            green "✓ Created issue for: $phase"
-            ((issue_count++))
-        } || {
-            red "Failed to create issue for: $phase"
-        }
-        echo ""
-        
-        # Small delay to avoid rate limiting
-        sleep 1
+        # Check if issue already exists
+        if gh issue list --repo "$REPO" --search "in:title \"$issue_title\"" --state all --limit 1 --json title | grep -q "\"$issue_title\""; then
+            yellow "⊘ Skipped (already exists): $phase"
+            echo ""
+        else
+            echo "$issue_body" | gh issue create \
+                --repo "$REPO" \
+                --title "$issue_title" \
+                --body-file - \
+                --label "$labels" && {
+                green "✓ Created issue for: $phase"
+                ((issue_count++))
+            } || {
+                red "Failed to create issue for: $phase"
+            }
+            echo ""
+            
+            # Small delay to avoid rate limiting
+            sleep 1
+        fi
     fi
 done
 
