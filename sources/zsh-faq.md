@@ -230,7 +230,7 @@ local str="Hello World"
 echo ${str:u}   # HELLO WORLD  (uppercase)
 echo ${str:l}   # hello world  (lowercase)
 
-# Capitalise first character
+# Capitalize first character
 echo ${(C)str}  # Hello World  (title case)
 ```
 

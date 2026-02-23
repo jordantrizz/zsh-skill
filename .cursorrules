@@ -1,0 +1,96 @@
+# Cursor IDE Rules — zsh-skill
+
+## Project Context
+
+This is a Zsh scripting knowledge base repository (`zsh-skill`). It contains documentation,
+examples, exercises, and prompt templates for Zsh shell scripting, optimised for use with
+AI coding assistants.
+
+## Language Rules
+
+- **Always write Zsh**, not Bash, unless the user explicitly asks for Bash.
+- Use `#!/usr/bin/env zsh` as the shebang for all executable `.zsh` scripts.
+- Target **Zsh 5.0+** compatibility.
+- Use `.zsh` extension for all Zsh scripts.
+
+## Code Style
+
+```
+- Quote all variable expansions:   "$var"  (not $var)
+- Use local for function variables: local myvar="value"
+- Associative arrays:               typeset -A  (not declare -A)
+- Conditionals:                     [[ ... ]]   (not [ ... ])
+- Arithmetic:                       (( ... ))
+- Output in scripts:                print       (not echo)
+- Return from sourced files:        return      (never exit)
+- Script-relative paths:            readonly SCRIPT_DIR="${0:A:h}"
+```
+
+## Knowledge Base
+
+The `sources/` directory is the primary reference. Use it for:
+
+| File | Topic |
+|------|-------|
+| `sources/zsh-basics.md` | Variables, arrays, functions, control flow |
+| `sources/zsh-advanced.md` | Glob qualifiers, completion, parameter expansion |
+| `sources/zsh-best-practices.md` | Coding standards, error handling, quoting |
+| `sources/zsh-scripting-patterns.md` | Reusable patterns and real-world examples |
+| `sources/zsh-troubleshooting.md` | Common errors, debugging, performance |
+| `sources/zsh-ecosystem.md` | Oh My Zsh, Prezto, plugin management |
+| `sources/zsh-reference.md` | Quick-reference tables for builtins and options |
+| `sources/zsh-faq.md` | Frequently asked questions and answers |
+| `sources/claude-guide.md` | Claude AI integration guidelines |
+
+## Error Handling Template
+
+Always include in production scripts:
+
+```zsh
+setopt ERR_EXIT PIPE_FAIL NO_UNSET
+trap cleanup EXIT INT TERM
+
+function cleanup() {
+    local code=$?
+    [[ $code -ne 0 ]] && print "Failed (exit ${code})" >&2
+}
+```
+
+## Testing
+
+- Tests live in `tests/` and use **bats-core**.
+- Unit tests: `tests/unit/test_<name>.bats`
+- Integration tests: `tests/integration/`
+- Run with: `bats tests/`
+
+## Common Pitfalls
+
+1. Zsh arrays are **1-indexed** — `$array[1]` not `$array[0]`.
+2. No word-splitting by default — use `${=var}` when needed.
+3. `exit` in a sourced file kills the parent shell — use `return`.
+4. Glob that matches nothing raises an error — use `(N)` qualifier or `setopt NULL_GLOB`.
+5. ShellCheck does **not** support Zsh — false positives are expected.
+
+## Prompt Templates
+
+The `prompts/` directory contains structured prompt templates:
+
+- `prompts/code-generation.md` — Generate new Zsh functions and scripts
+- `prompts/code-review.md` — Review Zsh code for best practices
+- `prompts/learning.md` — Learn Zsh concepts interactively
+- `prompts/debugging.md` — Debug Zsh script issues
+
+## Folder Structure
+
+```
+zsh-skill/
+├── sources/          # Core documentation (AI knowledge base)
+├── examples/         # Runnable Zsh scripts
+├── tests/            # bats test suite
+├── prompts/          # AI prompt templates
+├── .github/copilot/  # GitHub Copilot configuration & snippets
+├── .cursorrules      # This file — Cursor IDE configuration
+├── AGENTS.md         # AI platform integration guide
+├── BUILD.md          # Contributor & build guide
+└── TODO.md           # Development roadmap
+```
