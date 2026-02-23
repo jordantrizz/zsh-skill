@@ -22,10 +22,12 @@ contribute code, documentation, and tests.
 ## Development Setup
 
 ```zsh
-# Verify required tools
+# Required
 zsh --version          # 5.0+
-shellcheck --version   # 0.8+
 bats --version         # any recent version
+
+# Optional static analysis (no tool fully supports Zsh)
+shellcheck --version   # 0.8+ — bash-only; Zsh false positives expected
 
 # Install bats (if not present)
 sudo apt-get install bats      # Ubuntu/Debian
@@ -67,12 +69,13 @@ bats tests/unit/
 bats tests/integration/
 bats tests/docs/
 
-# Run ShellCheck on all .zsh files
-find . -name "*.zsh" -not -path "./.git/*" | xargs shellcheck --shell=bash --exclude=SC2296
+# Optional: run ShellCheck for best-effort hints (Zsh false positives are expected)
+find . -name "*.zsh" -not -path "./.git/*" | xargs shellcheck --shell=bash
 ```
 
-All tests must pass before a PR can be merged. The CI pipeline (`.github/workflows/ci.yml`)
-runs these checks automatically on every push and pull request.
+All bats tests must pass before a PR can be merged. ShellCheck output is informational
+and will not block a PR. The CI pipeline (`.github/workflows/ci.yml`) runs these checks
+automatically on every push and pull request.
 
 ---
 
@@ -102,7 +105,6 @@ runs these checks automatically on every push and pull request.
 Before opening a PR, confirm **all** of the following:
 
 - [ ] `bats tests/` passes with no failures
-- [ ] `shellcheck --shell=bash --exclude=SC2296` passes on all modified `.zsh` files
 - [ ] All `.zsh` files have a `#!/usr/bin/env zsh` shebang
 - [ ] New scripts include a `Description:` and `Usage:` comment header
 - [ ] Variables are quoted (`"$var"`)
@@ -112,6 +114,7 @@ Before opening a PR, confirm **all** of the following:
 - [ ] New example scripts have a corresponding test in `tests/unit/`
 - [ ] New source documents are listed in `tests/docs/test_docs_structure.bats`
 - [ ] PR description explains *what* changed and *why*
+- [ ] (Optional) Reviewed `shellcheck --shell=bash` output for any real issues
 
 ---
 
@@ -133,7 +136,7 @@ The CI pipeline enforces:
 
 | Check | Tool | Failure = block merge? |
 |-------|------|------------------------|
-| Static analysis | ShellCheck | Yes |
+| Static analysis | ShellCheck | No — informational only (no Zsh support) |
 | Unit tests | bats | Yes |
 | Integration tests | bats | Yes |
 | Documentation structure | bats | Yes |

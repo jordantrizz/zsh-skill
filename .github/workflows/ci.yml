@@ -11,8 +11,11 @@ permissions:
 
 jobs:
   lint:
-    name: ShellCheck Lint
+    name: ShellCheck Lint (informational)
     runs-on: ubuntu-latest
+    # ShellCheck has no Zsh dialect. Results are informational only — failures
+    # will not block the test or docs-validate jobs.
+    continue-on-error: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,6 +27,8 @@ jobs:
         run: |
           # ShellCheck has no Zsh dialect; use bash as the closest target.
           # Zsh-specific false positives are suppressed via .shellcheckrc.
+          # Results here are informational — Zsh-specific syntax will still
+          # produce false positives that ShellCheck cannot understand.
           find . -name "*.zsh" -not -path "./.git/*" | sort | while read -r f; do
             echo "Checking: $f"
             shellcheck --shell=bash "$f"
@@ -32,7 +37,6 @@ jobs:
   test:
     name: Bats Tests
     runs-on: ubuntu-latest
-    needs: lint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

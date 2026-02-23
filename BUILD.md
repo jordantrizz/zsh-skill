@@ -10,7 +10,7 @@ This document covers how to set up, contribute to, and extend the `zsh-skill` re
 |------|----------------|---------|
 | Zsh | 5.0+ | Running and testing all scripts |
 | Git | 2.x | Version control |
-| ShellCheck | 0.8+ | Static analysis for shell scripts |
+| ShellCheck | 0.8+ | Optional static analysis (Bash-only; Zsh support is limited) |
 | bats-core | any recent | Automated test runner |
 | GitHub CLI (`gh`) | 2.x | Issue/PR management |
 | GNU `make` | Optional | Running helper targets (if added) |
@@ -32,10 +32,9 @@ gh auth status
 ```
 
 > **Gotcha:** ShellCheck defaults to POSIX `sh` analysis. Always pass `--shell=bash`
-> explicitly. ShellCheck does **not** fully support Zsh-specific syntax (e.g., `${(U)var}`
-> flag expansions) — common false positives are suppressed via `.shellcheckrc` at the
-> repository root. Add inline `# shellcheck disable=SCxxxx` for any new Zsh-specific
-> constructs not already covered.
+> explicitly. ShellCheck does **not** support Zsh and will produce false positives for many
+> valid Zsh constructs. Use it as a complementary hint tool, not a hard gate. See the
+> **Phase 4 Linting** section below for recommendations.
 
 ---
 
@@ -70,21 +69,22 @@ chmod +x hello_world.zsh
 ./hello_world.zsh
 ```
 
-### Validating with ShellCheck
+### Static Analysis (optional)
 
-ShellCheck does not have a Zsh dialect, so use `bash` as the closest target and suppress
-known false positives:
+Neither ShellCheck nor any other widely-used tool fully supports the Zsh language.
+Use these tools as a best-effort hint — do not treat their output as authoritative for Zsh:
+
+| Tool | Zsh support | Notes |
+|------|-------------|-------|
+| [ShellCheck](https://github.com/koalaman/shellcheck) | ❌ None | Use `--shell=bash`; many false positives |
+| [mvdan/sh (shfmt)](https://github.com/mvdan/sh) | ⚠️ Partial | Formats and parses some Zsh constructs |
 
 ```zsh
-# Validate a single script
+# ShellCheck — use bash dialect, suppress known Zsh false positives via .shellcheckrc
 shellcheck --shell=bash examples/basic/hello_world.zsh
 
-# Validate all scripts recursively
-find . -name "*.zsh" | xargs shellcheck --shell=bash
-
-# Suppress a Zsh-specific false positive inline
-# shellcheck disable=SC2296
-echo "${(U)var}"
+# shfmt — check formatting (partial Zsh support)
+shfmt -ln bash examples/basic/hello_world.zsh
 ```
 
 ### Testing Scripts Manually
@@ -198,7 +198,6 @@ tools/
 Before opening a PR, confirm:
 
 - [ ] `bats tests/` passes with no failures
-- [ ] All `.zsh` files pass `shellcheck --shell=bash` (suppressions managed via `.shellcheckrc`)
 - [ ] Scripts execute without errors under `zsh -o ERR_EXIT -o NO_UNSET`
 - [ ] No hardcoded absolute paths (use `$SCRIPT_DIR` or `$HOME` variables)
 - [ ] Variables are quoted: `"$var"`, not `$var`
@@ -206,6 +205,7 @@ Before opening a PR, confirm:
 - [ ] Sourced files use `return`, not `exit`
 - [ ] New directories include a `README.md` explaining the contents
 - [ ] Exercise solutions include expected output in comments
+- [ ] (Optional) Review `shellcheck --shell=bash` output for any real Bash-portable issues
 
 ---
 
@@ -340,39 +340,40 @@ bats --tap tests/
 - The `$BATS_TEST_DIRNAME` variable points to the directory of the test file; use it to
   construct absolute paths to the scripts under test.
 
-### Linting with ShellCheck
+### Static Analysis (optional — not a CI gate)
 
-ShellCheck has no Zsh dialect; use `--shell=bash` as the closest approximation:
+No tool fully supports the Zsh language. Use static analysis as a best-effort hint only:
+
+| Tool | Zsh support | How to use |
+|------|-------------|-----------|
+| [ShellCheck](https://github.com/koalaman/shellcheck) | ❌ None (Bash only) | `shellcheck --shell=bash <file>` |
+| [mvdan/sh (shfmt)](https://github.com/mvdan/sh) | ⚠️ Partial | `shfmt -ln bash <file>` |
+
+**ShellCheck** with `--shell=bash` will report false positives for many valid Zsh constructs.
+Common Zsh-specific codes are suppressed in `.shellcheckrc`. Running ShellCheck is optional
+and will not block CI — the lint job is configured with `continue-on-error: true`.
 
 ```bash
-# Lint all .zsh files (Zsh-specific false positives are suppressed via .shellcheckrc)
+# Run ShellCheck locally (informational)
 find . -name "*.zsh" -not -path "./.git/*" | xargs shellcheck --shell=bash
 ```
 
-Inline suppression for constructs not covered by `.shellcheckrc`:
-
-```zsh
-# shellcheck disable=SC2034
-local my_var="value"  # intentionally unused in demo context
-```
-
-**Gotcha:** ShellCheck will flag Zsh-specific constructs such as `${(U)var}`, `typeset -A`,
-and `*(.)` glob qualifiers even with `--shell=bash`. These are expected false positives and
-are suppressed via `.shellcheckrc` at the repository root. Add targeted
-`# shellcheck disable=SCxxxx` comments for any Zsh-specific patterns not covered there.
+**Gotcha:** Do not add `# shellcheck disable=...` comments purely to silence Zsh-specific
+false positives in example scripts — it reduces readability. Prefer adding the code to
+`.shellcheckrc` instead, with a clear comment explaining the Zsh construct.
 
 ### CI/CD Pipeline
 
 The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` with three jobs:
 
-| Job | Steps |
-|-----|-------|
-| **ShellCheck Lint** | Runs ShellCheck on all `.zsh` files |
-| **Bats Tests** | Runs unit, integration, and documentation test suites |
-| **Documentation Validation** | Verifies required markdown files exist; checks shebangs |
+| Job | Blocks merge? | Steps |
+|-----|--------------|-------|
+| **ShellCheck Lint** | No (`continue-on-error: true`) | Runs ShellCheck informally on all `.zsh` files |
+| **Bats Tests** | Yes | Runs unit, integration, and documentation test suites |
+| **Documentation Validation** | Yes | Verifies required markdown files exist; checks shebangs |
 
-The **Bats Tests** job depends on (`needs:`) the **ShellCheck Lint** job — tests only run if
-linting passes.
+The **Bats Tests** and **Documentation Validation** jobs run independently — a ShellCheck
+warning will not prevent tests from running.
 
 **Gotcha:** The CI runner does not have Zsh pre-installed. The workflow installs `zsh` and
 `bats` via `apt-get` before running tests. If you add tests that require additional system

@@ -144,6 +144,7 @@ This repository is intended for educational and development assistance purposes.
 - [Zsh Documentation](https://zsh.sourceforge.io/Doc/)
 - [Zsh Guide](https://zsh.sourceforge.io/Guide/)
 - [Zsh Wiki](https://zsh.sourceforge.io/Wiki/)
+- [Zsh Reference (jade.fyi)](https://docs.jade.fyi/zsh/zsh.html)
 
 ### Community
 - [Arch Linux Zsh Wiki](https://wiki.archlinux.org/title/Zsh)

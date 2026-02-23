@@ -212,6 +212,7 @@ Example code or command
 
 ### Official Documentation
 - Zsh: https://zsh.sourceforge.io/Doc/
+- Zsh Reference (jade.fyi): https://docs.jade.fyi/zsh/zsh.html
 - GitHub Copilot: https://docs.github.com/en/copilot
 - Cursor: https://cursor.sh/docs
 - Aider: https://aider.chat/docs/
