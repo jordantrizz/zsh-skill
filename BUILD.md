@@ -381,6 +381,142 @@ packages, add the install step to `ci.yml`.
 
 ---
 
+## 🤖 Phase 5: AI Integration
+
+### GitHub Copilot Configuration
+
+Configuration lives in `.github/copilot/`:
+
+```
+.github/copilot/
+├── copilot-instructions.md   # Custom Copilot coding instructions for this repo
+└── snippets/
+    └── zsh-snippets.md       # Reusable Zsh code snippets for Copilot suggestions
+```
+
+`copilot-instructions.md` is automatically read by GitHub Copilot in any workspace that
+includes this repository. It sets the language dialect (Zsh), code style, and error-handling
+conventions so Copilot suggestions are idiomatic from the first completion.
+
+**Recommendations:**
+- Keep `copilot-instructions.md` concise (under 200 lines); Copilot truncates very long
+  instruction files.
+- Use fenced code blocks with the `zsh` language tag — Copilot uses them as exemplars.
+- Update `snippets/zsh-snippets.md` whenever a new canonical pattern is established.
+
+**Gotchas:**
+- Copilot does not reload instructions mid-session; restart your IDE after editing
+  `copilot-instructions.md`.
+- Instructions apply repo-wide. If you have mixed-language scripts, add language guards
+  ("when working with `.zsh` files") to avoid influencing Bash or Python suggestions.
+
+---
+
+### Cursor IDE Configuration
+
+`.cursorrules` in the repository root is automatically loaded by Cursor IDE when you open
+this folder. It configures the AI assistant with:
+
+- Project context (Zsh knowledge base)
+- Language rules (Zsh, not Bash)
+- Code style conventions
+- Links to the `sources/` knowledge base
+
+**Recommendations:**
+- Keep `.cursorrules` focused on conventions that differ from general coding standards.
+- List the key source files so Cursor's AI can reference them with `@filename`.
+- Update `.cursorrules` whenever the repository structure changes significantly.
+
+**Gotchas:**
+- `.cursorrules` is a flat text/markdown file; do not rely on JSON or YAML syntax.
+- Cursor reads `.cursorrules` at project open time; changes require reopening the folder.
+
+---
+
+### Claude Integration
+
+`sources/claude-guide.md` documents how to use this repository with Claude
+(claude.ai, Claude Code, or the Anthropic API). It covers:
+
+- Recommended context-loading strategies
+- Structured prompt templates (using `<context>`, `<task>`, `<code>` delimiters)
+- Worked examples for code generation, review, learning, and debugging
+- Capabilities and limitations table
+
+**Recommendations:**
+- When sharing source files with Claude, use XML-like delimiters to separate context from
+  the task:
+  ```
+  <context>
+  [paste sources/zsh-best-practices.md]
+  </context>
+
+  <task>
+  Review this script: [paste script]
+  </task>
+  ```
+- For long review sessions, share only the relevant source sections rather than entire files
+  to keep context window usage efficient.
+
+**Gotchas:**
+- Claude does not execute code. All script analysis is static. Always run reviewed scripts
+  in a test environment before deploying.
+- Context windows have token limits. If sharing multiple large source files, prefer the
+  sections most relevant to the task.
+
+---
+
+### Prompt Templates
+
+Reusable prompt templates live in `prompts/`:
+
+```
+prompts/
+├── README.md              # Usage guide for the prompt templates
+├── code-generation.md     # Prompts for generating new Zsh scripts/functions
+├── code-review.md         # Prompts for reviewing Zsh code quality
+├── learning.md            # Prompts for learning Zsh concepts
+└── debugging.md           # Prompts for diagnosing Zsh script issues
+```
+
+Each template uses `[PLACEHOLDER]` syntax for parts you fill in. See `prompts/README.md`
+for instructions on attaching context files for each AI platform.
+
+**Recommendations:**
+- When creating a new prompt template, add it as a new `##` section in the relevant file
+  rather than a new file, unless the topic warrants its own document.
+- Include a "Context files" note in each template specifying which `sources/` documents
+  to provide as context.
+
+**Gotchas:**
+- Prompt templates are starting points. LLM responses vary between sessions; always review
+  generated code before using it.
+- Templates reference files in `sources/`. If a source file is renamed, update all prompt
+  templates that reference it.
+
+---
+
+### Knowledge Base Optimization
+
+Source documents in `sources/` follow these conventions for optimal AI parsing:
+
+1. **Semantic tags** — `<!-- semantic-tags: topic1, topic2 -->` comments after headings help
+   AI models identify relevant sections during retrieval.
+2. **Knowledge graph links** — `<!-- related: file.md#section -->` comments at the bottom of
+   each file create explicit cross-document relationships.
+3. **FAQ sections** — `sources/zsh-faq.md` provides question-and-answer pairs that match
+   natural language queries from AI chat interfaces.
+4. **Structured headings** — `#` / `##` / `###` hierarchy makes sections easy to reference
+   and quote (`@docs sources/zsh-advanced.md#glob-qualifiers`).
+
+**Gotchas:**
+- HTML comments (`<!-- ... -->`) are invisible in rendered markdown but are included in the
+  raw text that AI models receive. Do not put sensitive information in them.
+- Very long documents may be chunked or truncated by AI retrieval systems. Keep each
+  `sources/` file focused on a single topic domain.
+
+---
+
 ## 🔗 Related Documents
 
 - [README.md](README.md) — Project overview and quick start
@@ -390,7 +526,10 @@ packages, add the install step to `ci.yml`.
 - [tests/README.md](tests/README.md) — Test suite documentation
 - [sources/zsh-best-practices.md](sources/zsh-best-practices.md) — Coding standards
 - [sources/zsh-troubleshooting.md](sources/zsh-troubleshooting.md) — Debugging techniques
+- [sources/claude-guide.md](sources/claude-guide.md) — Claude AI integration guide
+- [sources/zsh-faq.md](sources/zsh-faq.md) — Frequently asked questions
+- [prompts/README.md](prompts/README.md) — Prompt template usage guide
 
 ---
 
-**Last Updated:** 2026-02-20
+**Last Updated:** 2026-02-23

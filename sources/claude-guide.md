@@ -263,3 +263,7 @@ Use standard markdown links to create relationships between documents:
 4. **Reference source files explicitly**: "Following the conventions in `sources/zsh-best-practices.md`…"
 5. **Ask for explanations**: Claude's explanations help you learn, not just copy-paste.
 6. **Request step-by-step reasoning** for complex debugging: "Think through this step by step."
+
+---
+
+**Last Updated:** 2026-02-23
