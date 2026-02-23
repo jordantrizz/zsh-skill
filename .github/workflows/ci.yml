@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: ShellCheck Lint (informational)
+    runs-on: ubuntu-latest
+    # ShellCheck has no Zsh dialect. Results are informational only — failures
+    # will not block the test or docs-validate jobs.
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ShellCheck
+        run: sudo apt-get update -q && sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on all .zsh files
+        run: |
+          # ShellCheck has no Zsh dialect; use bash as the closest target.
+          # Zsh-specific false positives are suppressed via .shellcheckrc.
+          # Results here are informational — Zsh-specific syntax will still
+          # produce false positives that ShellCheck cannot understand.
+          find . -name "*.zsh" -not -path "./.git/*" | sort | while read -r f; do
+            echo "Checking: $f"
+            shellcheck --shell=bash "$f"
+          done
+
+  test:
+    name: Bats Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Zsh and bats
+        run: sudo apt-get update -q && sudo apt-get install -y zsh bats
+
+      - name: Run unit tests
+        run: bats tests/unit/
+
+      - name: Run integration tests
+        run: bats tests/integration/
+
+      - name: Run documentation tests
+        run: bats tests/docs/
+
+  docs-validate:
+    name: Documentation Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify required markdown files exist
+        run: |
+          required_files=(
+            README.md
+            TODO.md
+            BUILD.md
+            AGENTS.md
+            CONTRIBUTING.md
+            sources/zsh-basics.md
+            sources/zsh-advanced.md
+            sources/zsh-best-practices.md
+            sources/zsh-scripting-patterns.md
+            sources/zsh-troubleshooting.md
+            sources/zsh-ecosystem.md
+            sources/zsh-reference.md
+          )
+          missing=0
+          for f in "${required_files[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f"
+              missing=1
+            else
+              echo "OK: $f"
+            fi
+          done
+          exit $missing
+
+      - name: Verify all .zsh example files have a shebang
+        run: |
+          missing=0
+          while IFS= read -r -d '' f; do
+            if ! head -1 "$f" | grep -qE "^#!"; then
+              echo "Missing shebang: $f"
+              missing=1
+            fi
+          done < <(find examples/ -name "*.zsh" -print0)
+          exit $missing

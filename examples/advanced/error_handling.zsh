@@ -85,7 +85,7 @@ pipeline_demo() {
     fi
 
     # Check $pipestatus for individual codes
-    echo "line1" | grep "line" | wc -l > /dev/null
+    echo "line1" | grep -c "line" > /dev/null
     echo "  Pipe statuses: ${pipestatus[@]}"
 }
 pipeline_demo

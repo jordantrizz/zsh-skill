@@ -28,10 +28,8 @@ do_work "gamma"  1 &; local pid_gamma=$!
 
 # Wait for specific job
 wait $pid_alpha && echo "  alpha is done"
-
-# Wait for all remaining
-wait
-echo "  All tasks finished"
+wait $pid_gamma && echo "  gamma is done"
+wait $pid_beta  && echo "  beta is done"
 
 # --- Parallel Execution with Exit Code Tracking ---
 echo ""
