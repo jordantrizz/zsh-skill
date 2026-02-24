@@ -58,10 +58,10 @@ function cleanup() {
 
 ## Testing
 
-- Tests live in `tests/` and use **bats-core**.
-- Unit tests: `tests/unit/test_<name>.bats`
-- Integration tests: `tests/integration/`
-- Run with: `bats tests/`
+- Tests live in `tests/` and use **ShellSpec** (native Zsh support via `--shell zsh`).
+- Unit specs: `tests/unit/<name>_spec.sh`
+- Integration specs: `tests/integration/`
+- Run with: `shellspec` (uses `.shellspec` config) or `shellspec --shell zsh tests/`
 
 ## Common Pitfalls
 

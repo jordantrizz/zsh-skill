@@ -24,14 +24,16 @@ contribute code, documentation, and tests.
 ```zsh
 # Required
 zsh --version          # 5.0+
-bats --version         # any recent version
+shellspec --version    # 0.28+
 
 # Optional static analysis (no tool fully supports Zsh)
 shellcheck --version   # 0.8+ — bash-only; Zsh false positives expected
 
-# Install bats (if not present)
-sudo apt-get install bats      # Ubuntu/Debian
-brew install bats-core         # macOS
+# Install ShellSpec (if not present)
+curl -fsSL https://github.com/shellspec/shellspec/releases/download/0.28.1/shellspec-dist.tar.gz \
+  | tar -zxf - -C /tmp
+sudo ln -s /tmp/shellspec/shellspec /usr/local/bin/shellspec  # Linux
+brew install shellspec                                         # macOS
 ```
 
 ---
@@ -62,18 +64,18 @@ brew install bats-core         # macOS
 
 ```bash
 # Run the full test suite
-bats tests/
+shellspec
 
 # Run a specific suite
-bats tests/unit/
-bats tests/integration/
-bats tests/docs/
+shellspec --shell zsh tests/unit/
+shellspec --shell zsh tests/integration/
+shellspec --shell zsh tests/docs/
 
 # Optional: run ShellCheck for best-effort hints (Zsh false positives are expected)
 find . -name "*.zsh" -not -path "./.git/*" | xargs shellcheck --shell=bash
 ```
 
-All bats tests must pass before a PR can be merged. ShellCheck output is informational
+All ShellSpec specs must pass before a PR can be merged. ShellCheck output is informational
 and will not block a PR. The CI pipeline (`.github/workflows/ci.yml`) runs these checks
 automatically on every push and pull request.
 
@@ -89,14 +91,14 @@ automatically on every push and pull request.
    - `examples/functions/` — reusable function libraries
    - `examples/config/` — `.zshrc` / `.zshenv` examples
 2. Follow the existing script style (shebang, description comment, sections).
-3. Add a corresponding unit test in `tests/unit/test_<script_name>.bats`.
+3. Add a corresponding unit spec in `tests/unit/<script_name>_spec.sh`.
 4. Verify the script passes ShellCheck (with documented suppressions if needed).
 
 ### New Documentation
 
 1. Add the `.md` file to the `sources/` directory.
 2. Reference it from `README.md` and `BUILD.md` where appropriate.
-3. Add a file-existence check to `tests/docs/test_docs_structure.bats`.
+3. Add a file-existence check to `tests/docs/docs_structure_spec.sh`.
 
 ---
 
@@ -104,7 +106,7 @@ automatically on every push and pull request.
 
 Before opening a PR, confirm **all** of the following:
 
-- [ ] `bats tests/` passes with no failures
+- [ ] `shellspec` passes with no failures
 - [ ] All `.zsh` files have a `#!/usr/bin/env zsh` shebang
 - [ ] New scripts include a `Description:` and `Usage:` comment header
 - [ ] Variables are quoted (`"$var"`)
@@ -112,7 +114,7 @@ Before opening a PR, confirm **all** of the following:
 - [ ] Sourced files use `return`, not `exit`
 - [ ] No hardcoded absolute paths (use `$SCRIPT_DIR`, `$HOME`, or `command -v`)
 - [ ] New example scripts have a corresponding test in `tests/unit/`
-- [ ] New source documents are listed in `tests/docs/test_docs_structure.bats`
+- [ ] New source documents are listed in `tests/docs/docs_structure_spec.sh`
 - [ ] PR description explains *what* changed and *why*
 - [ ] (Optional) Reviewed `shellcheck --shell=bash` output for any real issues
 
@@ -137,9 +139,9 @@ The CI pipeline enforces:
 | Check | Tool | Failure = block merge? |
 |-------|------|------------------------|
 | Static analysis | ShellCheck | No — informational only (no Zsh support) |
-| Unit tests | bats | Yes |
-| Integration tests | bats | Yes |
-| Documentation structure | bats | Yes |
+| Unit specs | ShellSpec | Yes |
+| Integration specs | ShellSpec | Yes |
+| Documentation structure | ShellSpec | Yes |
 | Required file presence | bash | Yes |
 
 ---

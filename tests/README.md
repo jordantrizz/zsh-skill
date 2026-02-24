@@ -1,24 +1,25 @@
 # Tests — zsh-skill
 
 This directory contains the automated test suite for the `zsh-skill` repository,
-implemented with **[bats-core](https://github.com/bats-core/bats-core)** (Bash Automated
-Testing System).
+implemented with **[ShellSpec](https://github.com/shellspec/shellspec)** — a BDD-style
+testing framework with native Zsh support.
 
 ---
 
-## Framework: bats-core
+## Framework: ShellSpec
 
-**Why bats?**
-After evaluating the three main Zsh/shell testing frameworks:
+**Why ShellSpec?**
+After evaluating the available Zsh/shell testing frameworks:
 
 | Framework | Verdict |
 |-----------|---------|
-| **bats-core** | ✅ Selected — actively maintained, TAP output, widely used in CI |
+| **ShellSpec** | ✅ Selected — native Zsh support (`--shell zsh`), BDD DSL, actively maintained |
+| bats-core | ❌ Bash only; Zsh must be invoked as a subprocess |
 | shunit2 | ⚠️ Simpler API but less CI-friendly; no TAP output |
 | zunit | ⚠️ Zsh-native but less widely supported; smaller community |
 
-bats tests run in Bash but can invoke `zsh` as a sub-process, making them suitable for
-testing Zsh scripts without requiring Zsh as the test runner itself.
+Running specs with `--shell zsh` means spec files execute natively in Zsh, eliminating
+the Bash/Zsh mismatch that bats-core requires.
 
 ---
 
@@ -26,15 +27,15 @@ testing Zsh scripts without requiring Zsh as the test runner itself.
 
 ```
 tests/
-├── README.md                    # This file
-├── unit/                        # Unit tests — one .bats file per example script
-│   ├── test_hello_world.bats
-│   ├── test_arrays_and_maps.bats
-│   └── test_error_handling.bats
-├── integration/                 # Integration tests — run all examples end-to-end
-│   └── test_examples_run.bats
-└── docs/                        # Documentation tests — validate repo structure
-    └── test_docs_structure.bats
+├── README.md                        # This file
+├── unit/                            # Unit specs — one _spec.sh per example script
+│   ├── hello_world_spec.sh
+│   ├── arrays_and_maps_spec.sh
+│   └── error_handling_spec.sh
+├── integration/                     # Integration specs — run all examples end-to-end
+│   └── examples_run_spec.sh
+└── docs/                            # Documentation specs — validate repo structure
+    └── docs_structure_spec.sh
 ```
 
 ---
@@ -44,11 +45,13 @@ tests/
 ### Prerequisites
 
 ```bash
-# Install bats-core (Ubuntu/Debian)
-sudo apt-get install bats
+# Install ShellSpec
+curl -fsSL https://github.com/shellspec/shellspec/releases/download/0.28.1/shellspec-dist.tar.gz \
+  | tar -zxf - -C /tmp
+sudo ln -s /tmp/shellspec/shellspec /usr/local/bin/shellspec
 
-# Install bats-core (macOS via Homebrew)
-brew install bats-core
+# Install ShellSpec (macOS via Homebrew)
+brew install shellspec
 
 # Install Zsh (required to run example scripts)
 sudo apt-get install zsh     # Ubuntu/Debian
@@ -58,60 +61,62 @@ brew install zsh             # macOS
 ### Run All Tests
 
 ```bash
-bats tests/
+shellspec
 ```
 
 ### Run a Specific Suite
 
 ```bash
-bats tests/unit/
-bats tests/integration/
-bats tests/docs/
+shellspec --shell zsh tests/unit/
+shellspec --shell zsh tests/integration/
+shellspec --shell zsh tests/docs/
 ```
 
 ### Run a Single File
 
 ```bash
-bats tests/unit/test_hello_world.bats
+shellspec --shell zsh tests/unit/hello_world_spec.sh
 ```
 
 ### TAP Output (for CI)
 
 ```bash
-bats --tap tests/
+shellspec --shell zsh --format tap tests/
 ```
 
 ---
 
 ## Writing Tests
 
-Each `.bats` file follows this pattern:
+Each `_spec.sh` file follows this pattern:
 
-```bash
-#!/usr/bin/env bats
+```sh
+#!/usr/bin/env sh
+# my_script_spec.sh - Unit tests for examples/basic/my_script.zsh
 
-setup() {
-    SCRIPT="$BATS_TEST_DIRNAME/../../examples/basic/my_script.zsh"
-}
+Describe 'my_script.zsh'
+  my_script() { zsh "${SHELLSPEC_SPECDIR}/../examples/basic/my_script.zsh" "$@"; }
 
-@test "script exits successfully" {
-    run zsh "$SCRIPT"
-    [ "$status" -eq 0 ]
-}
+  It 'exits with status 0'
+    When run my_script
+    The status should be success
+  End
 
-@test "script produces expected output" {
-    run zsh "$SCRIPT"
-    [[ "$output" == *"expected text"* ]]
-}
+  It 'produces expected output'
+    When run my_script
+    The output should include 'expected text'
+  End
+End
 ```
 
 ### Conventions
 
-- File names must start with `test_` and end with `.bats`.
-- Each test description should be a plain-English sentence.
-- Use `run` before any command whose exit code or output you want to assert.
-- Prefer `[[ ... ]]` over `[ ... ]` for string matching inside bats tests.
-- Use `skip "reason"` to mark tests that require optional tooling (e.g., `shellcheck`).
+- File names must end with `_spec.sh`.
+- Wrap each script-under-test in a helper function using `$SHELLSPEC_SPECDIR` for path resolution.
+- Each `It` block should describe one observable behaviour.
+- Use `The status should be success` for exit code 0; `The status should be failure` for non-zero.
+- Use `The output should include 'text'` for partial output matching.
+- Use `Skip "reason"` to mark specs that require optional tooling.
 
 ---
 

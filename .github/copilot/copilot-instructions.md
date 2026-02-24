@@ -109,14 +109,18 @@ When generating Zsh code, reference these source documents:
 
 ## Testing
 
-New scripts should have corresponding bats tests in `tests/unit/`. Follow the pattern:
+New scripts should have corresponding ShellSpec specs in `tests/unit/`. Follow the pattern:
 
-```bash
-#!/usr/bin/env bats
-# tests/unit/test_my_script.bats
+```sh
+#!/usr/bin/env sh
+# tests/unit/my_script_spec.sh
 
-@test "my_script: basic usage" {
-    run zsh "${BATS_TEST_DIRNAME}/../../examples/basic/my_script.zsh"
-    [ "$status" -eq 0 ]
-}
+Describe 'my_script.zsh'
+  my_script() { zsh "${SHELLSPEC_SPECDIR}/../examples/basic/my_script.zsh" "$@"; }
+
+  It 'exits with status 0'
+    When run my_script
+    The status should be success
+  End
+End
 ```

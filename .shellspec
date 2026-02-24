@@ -1,0 +1,11 @@
+## ShellSpec configuration for zsh-skill
+## https://github.com/shellspec/shellspec
+
+# Run specs with Zsh for native Zsh support
+shell: zsh
+
+# Spec directory
+specdir: tests
+
+# Default format
+format: documentation

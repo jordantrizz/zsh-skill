@@ -75,8 +75,8 @@ This document outlines the development phases for creating a comprehensive Zsh s
 
 ### Testing Framework
 - [x] Research Zsh testing frameworks
-  - [x] Evaluate zunit, shunit2, bats
-  - [x] Select appropriate framework (bats-core selected)
+  - [x] Evaluate zunit, shunit2, bats, shellspec
+  - [x] Select appropriate framework (shellspec selected — native Zsh support)
 - [x] Create tests/ directory
   - [x] Unit tests for examples
   - [x] Integration tests

@@ -179,7 +179,7 @@ You are an expert Zsh developer. Write a Zsh automation script.
 - Add "Avoid external commands; use only Zsh built-ins" for embedded/minimal environments.
 - Add "Include `shellcheck` annotations for any constructs that may trigger false positives"
   when linting is part of your CI pipeline.
-- Append "Provide a BATS test file with at least three test cases" to get tests alongside code.
+- Append "Provide a ShellSpec `_spec.sh` file with at least three test cases" to get specs alongside code.
 
 ---
 
