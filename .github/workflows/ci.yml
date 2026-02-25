@@ -35,23 +35,23 @@ jobs:
           done
 
   test:
-    name: Bats Tests
+    name: ShellSpec Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Zsh and bats
-        run: sudo apt-get update -q && sudo apt-get install -y zsh bats
+      - name: Install Zsh
+        run: sudo apt-get update -q && sudo apt-get install -y zsh
 
-      - name: Run unit tests
-        run: bats tests/unit/
+      - name: Install ShellSpec
+        run: |
+          curl -fsSL https://github.com/shellspec/shellspec/releases/download/0.28.1/shellspec-dist.tar.gz \
+            | tar -zxf - -C /tmp
+          sudo ln -s /tmp/shellspec/shellspec /usr/local/bin/shellspec
 
-      - name: Run integration tests
-        run: bats tests/integration/
-
-      - name: Run documentation tests
-        run: bats tests/docs/
+      - name: Run all specs
+        run: shellspec --shell zsh tests/
 
   docs-validate:
     name: Documentation Validation

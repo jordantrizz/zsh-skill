@@ -11,7 +11,7 @@ This document covers how to set up, contribute to, and extend the `zsh-skill` re
 | Zsh | 5.0+ | Running and testing all scripts |
 | Git | 2.x | Version control |
 | ShellCheck | 0.8+ | Optional static analysis (Bash-only; Zsh support is limited) |
-| bats-core | any recent | Automated test runner |
+| ShellSpec | 0.28+ | Automated test runner (native Zsh support) |
 | GitHub CLI (`gh`) | 2.x | Issue/PR management |
 | GNU `make` | Optional | Running helper targets (if added) |
 
@@ -24,8 +24,8 @@ zsh --version
 # Check ShellCheck
 shellcheck --version
 
-# Check bats
-bats --version
+# Check ShellSpec
+shellspec --version
 
 # Check GitHub CLI authentication
 gh auth status
@@ -143,7 +143,7 @@ templates/
 ├── script-full.zsh          # Full template with error handling and logging
 ├── function-library.zsh     # Template for sourced function collections
 ├── config-file.zsh          # .zshrc / .zshenv snippet template
-└── test-template.zsh        # Template for script tests (shunit2 / bats style)
+└── test-template.zsh        # Template for script tests (shellspec style)
 ```
 
 **Recommendations:**
@@ -197,7 +197,7 @@ tools/
 
 Before opening a PR, confirm:
 
-- [ ] `bats tests/` passes with no failures
+- [ ] `shellspec tests/` passes with no failures
 - [ ] Scripts execute without errors under `zsh -o ERR_EXIT -o NO_UNSET`
 - [ ] No hardcoded absolute paths (use `$SCRIPT_DIR` or `$HOME` variables)
 - [ ] Variables are quoted: `"$var"`, not `$var`
@@ -278,67 +278,76 @@ local -a logs=(*.log(N))
 
 ### Testing Framework
 
-The repository uses **bats-core** (Bash Automated Testing System) for automated testing.
-Bats was selected after evaluating the three main Zsh/shell testing frameworks:
+The repository uses **[ShellSpec](https://github.com/shellspec/shellspec)** for automated testing.
+ShellSpec was chosen because it natively supports Zsh as the test runner, allowing spec files to
+use Zsh syntax directly — unlike bats-core, which runs in Bash only.
 
 | Framework | Decision | Reason |
 |-----------|----------|--------|
-| **bats-core** | ✅ Selected | Actively maintained, TAP output, works on CI runners |
-| shunit2 | Considered | Simpler but no TAP output; less CI-friendly |
+| **ShellSpec** | ✅ Selected | Native Zsh support (`--shell zsh`), BDD-style DSL, actively maintained |
+| bats-core | Replaced | Runs in Bash only; Zsh must be invoked as a subprocess |
+| shunit2 | Considered | No TAP output; less CI-friendly |
 | zunit | Considered | Zsh-native but smaller community and tooling |
 
-Install bats:
+Install ShellSpec:
 
 ```bash
-# Ubuntu/Debian
-sudo apt-get install bats
+# Download and install (Linux/macOS)
+curl -fsSL https://github.com/shellspec/shellspec/releases/download/0.28.1/shellspec-dist.tar.gz \
+  | tar -zxf - -C /tmp
+sudo ln -s /tmp/shellspec/shellspec /usr/local/bin/shellspec
 
-# macOS
-brew install bats-core
+# macOS via Homebrew
+brew install shellspec
+
+# Verify installation
+shellspec --version
 ```
 
 ### Test Suite Layout
 
 ```
 tests/
-├── README.md                        # Framework docs and conventions
-├── unit/                            # One .bats file per example script
-│   ├── test_hello_world.bats
-│   ├── test_arrays_and_maps.bats
-│   └── test_error_handling.bats
-├── integration/                     # End-to-end: all examples run without error
-│   └── test_examples_run.bats
-└── docs/                            # Repository structure validation
-    └── test_docs_structure.bats
+├── README.md                            # Framework docs and conventions
+├── unit/                                # Unit specs — one _spec.sh per example script
+│   ├── hello_world_spec.sh
+│   ├── arrays_and_maps_spec.sh
+│   └── error_handling_spec.sh
+├── integration/                         # End-to-end: all examples run without error
+│   └── examples_run_spec.sh
+└── docs/                                # Repository structure validation
+    └── docs_structure_spec.sh
 ```
 
 ### Running the Tests
 
 ```bash
 # All suites
-bats tests/
+shellspec tests/
 
-# Single suite
-bats tests/unit/
-bats tests/integration/
-bats tests/docs/
+# Single subdirectory
+shellspec --shell zsh tests/unit/
 
-# TAP output (for CI/CD integration)
-bats --tap tests/
+# Single spec file
+shellspec --shell zsh tests/unit/hello_world_spec.sh
 ```
 
 **Recommendations:**
 - Run the full test suite locally before pushing any changes.
-- When adding a new example script, add a corresponding test file in `tests/unit/`.
+- When adding a new example script, add a corresponding spec file in `tests/unit/`.
 - When adding a new source document, add a file-existence check in
-  `tests/docs/test_docs_structure.bats`.
+  `tests/docs/docs_structure_spec.sh`.
 
 **Gotchas:**
-- Bats runs in Bash, not Zsh. Tests invoke `zsh` as a subprocess to execute `.zsh` scripts.
-  Ensure Zsh is installed in your environment (`sudo apt-get install zsh` on Ubuntu).
-- Avoid using Zsh-specific syntax inside `.bats` test files — use portable Bash syntax.
-- The `$BATS_TEST_DIRNAME` variable points to the directory of the test file; use it to
-  construct absolute paths to the scripts under test.
+- ShellSpec runs spec files with the shell specified via `--shell` (or the `.shellspec` config).
+  Use `--shell zsh` to get native Zsh support in spec files.
+- Spec files use ShellSpec's DSL (`Describe`, `It`, `When run`, `The status should be success`).
+  Do not use Bash-specific syntax in spec files when running with `--shell zsh`.
+- `$SHELLSPEC_SPECDIR` points to the spec root directory (the argument to `shellspec`, e.g.,
+  `tests/`). Use it to build absolute paths to scripts under test:
+  ```sh
+  my_script() { zsh "${SHELLSPEC_SPECDIR}/../examples/basic/my_script.zsh" "$@"; }
+  ```
 
 ### Static Analysis (optional — not a CI gate)
 
@@ -369,15 +378,150 @@ The repository includes a GitHub Actions workflow at `.github/workflows/ci.yml` 
 | Job | Blocks merge? | Steps |
 |-----|--------------|-------|
 | **ShellCheck Lint** | No (`continue-on-error: true`) | Runs ShellCheck informally on all `.zsh` files |
-| **Bats Tests** | Yes | Runs unit, integration, and documentation test suites |
+| **ShellSpec Tests** | Yes | Runs all unit, integration, and documentation specs |
 | **Documentation Validation** | Yes | Verifies required markdown files exist; checks shebangs |
 
-The **Bats Tests** and **Documentation Validation** jobs run independently — a ShellCheck
+The **ShellSpec Tests** and **Documentation Validation** jobs run independently — a ShellCheck
 warning will not prevent tests from running.
 
-**Gotcha:** The CI runner does not have Zsh pre-installed. The workflow installs `zsh` and
-`bats` via `apt-get` before running tests. If you add tests that require additional system
-packages, add the install step to `ci.yml`.
+**Gotcha:** The CI runner installs `zsh` and `shellspec` before running tests. If you add specs
+that require additional system packages, add the install step to `ci.yml`.
+
+---
+
+## 🤖 Phase 5: AI Integration
+
+### GitHub Copilot Configuration
+
+Configuration lives in `.github/copilot/`:
+
+```
+.github/copilot/
+├── copilot-instructions.md   # Custom Copilot coding instructions for this repo
+└── snippets/
+    └── zsh-snippets.md       # Reusable Zsh code snippets for Copilot suggestions
+```
+
+`copilot-instructions.md` is automatically read by GitHub Copilot in any workspace that
+includes this repository. It sets the language dialect (Zsh), code style, and error-handling
+conventions so Copilot suggestions are idiomatic from the first completion.
+
+**Recommendations:**
+- Keep `copilot-instructions.md` concise (under 200 lines); Copilot truncates very long
+  instruction files.
+- Use fenced code blocks with the `zsh` language tag — Copilot uses them as exemplars.
+- Update `snippets/zsh-snippets.md` whenever a new canonical pattern is established.
+
+**Gotchas:**
+- Copilot does not reload instructions mid-session; restart your IDE after editing
+  `copilot-instructions.md`.
+- Instructions apply repo-wide. If you have mixed-language scripts, add language guards
+  ("when working with `.zsh` files") to avoid influencing Bash or Python suggestions.
+
+---
+
+### Cursor IDE Configuration
+
+`.cursorrules` in the repository root is automatically loaded by Cursor IDE when you open
+this folder. It configures the AI assistant with:
+
+- Project context (Zsh knowledge base)
+- Language rules (Zsh, not Bash)
+- Code style conventions
+- Links to the `sources/` knowledge base
+
+**Recommendations:**
+- Keep `.cursorrules` focused on conventions that differ from general coding standards.
+- List the key source files so Cursor's AI can reference them with `@filename`.
+- Update `.cursorrules` whenever the repository structure changes significantly.
+
+**Gotchas:**
+- `.cursorrules` is a flat text/markdown file; do not rely on JSON or YAML syntax.
+- Cursor reads `.cursorrules` at project open time; changes require reopening the folder.
+
+---
+
+### Claude Integration
+
+`sources/claude-guide.md` documents how to use this repository with Claude
+(claude.ai, Claude Code, or the Anthropic API). It covers:
+
+- Recommended context-loading strategies
+- Structured prompt templates (using `<context>`, `<task>`, `<code>` delimiters)
+- Worked examples for code generation, review, learning, and debugging
+- Capabilities and limitations table
+
+**Recommendations:**
+- When sharing source files with Claude, use XML-like delimiters to separate context from
+  the task:
+  ```
+  <context>
+  [paste sources/zsh-best-practices.md]
+  </context>
+
+  <task>
+  Review this script: [paste script]
+  </task>
+  ```
+- For long review sessions, share only the relevant source sections rather than entire files
+  to keep context window usage efficient.
+
+**Gotchas:**
+- Claude does not execute code. All script analysis is static. Always run reviewed scripts
+  in a test environment before deploying.
+- Context windows have token limits. If sharing multiple large source files, prefer the
+  sections most relevant to the task.
+
+---
+
+### Prompt Templates
+
+Reusable prompt templates live in `prompts/`:
+
+```
+prompts/
+├── README.md              # Usage guide for the prompt templates
+├── code-generation.md     # Prompts for generating new Zsh scripts/functions
+├── code-review.md         # Prompts for reviewing Zsh code quality
+├── learning.md            # Prompts for learning Zsh concepts
+└── debugging.md           # Prompts for diagnosing Zsh script issues
+```
+
+Each template uses `[PLACEHOLDER]` syntax for parts you fill in. See `prompts/README.md`
+for instructions on attaching context files for each AI platform.
+
+**Recommendations:**
+- When creating a new prompt template, add it as a new `##` section in the relevant file
+  rather than a new file, unless the topic warrants its own document.
+- Include a "Context files" note in each template specifying which `sources/` documents
+  to provide as context.
+
+**Gotchas:**
+- Prompt templates are starting points. LLM responses vary between sessions; always review
+  generated code before using it.
+- Templates reference files in `sources/`. If a source file is renamed, update all prompt
+  templates that reference it.
+
+---
+
+### Knowledge Base Optimization
+
+Source documents in `sources/` follow these conventions for optimal AI parsing:
+
+1. **Semantic tags** — `<!-- semantic-tags: topic1, topic2 -->` comments after headings help
+   AI models identify relevant sections during retrieval.
+2. **Knowledge graph links** — `<!-- related: file.md#section -->` comments at the bottom of
+   each file create explicit cross-document relationships.
+3. **FAQ sections** — `sources/zsh-faq.md` provides question-and-answer pairs that match
+   natural language queries from AI chat interfaces.
+4. **Structured headings** — `#` / `##` / `###` hierarchy makes sections easy to reference
+   and quote (`@docs sources/zsh-advanced.md#glob-qualifiers`).
+
+**Gotchas:**
+- HTML comments (`<!-- ... -->`) are invisible in rendered markdown but are included in the
+  raw text that AI models receive. Do not put sensitive information in them.
+- Very long documents may be chunked or truncated by AI retrieval systems. Keep each
+  `sources/` file focused on a single topic domain.
 
 ---
 
@@ -390,7 +534,10 @@ packages, add the install step to `ci.yml`.
 - [tests/README.md](tests/README.md) — Test suite documentation
 - [sources/zsh-best-practices.md](sources/zsh-best-practices.md) — Coding standards
 - [sources/zsh-troubleshooting.md](sources/zsh-troubleshooting.md) — Debugging techniques
+- [sources/claude-guide.md](sources/claude-guide.md) — Claude AI integration guide
+- [sources/zsh-faq.md](sources/zsh-faq.md) — Frequently asked questions
+- [prompts/README.md](prompts/README.md) — Prompt template usage guide
 
 ---
 
-**Last Updated:** 2026-02-20
+**Last Updated:** 2026-02-23
