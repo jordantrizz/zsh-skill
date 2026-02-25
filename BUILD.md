@@ -617,6 +617,125 @@ secure coding templates, and a pre-deployment security checklist.
 
 ---
 
+## 🌐 Phase 7: Community & Ecosystem
+
+### Community Files
+
+Phase 7 adds the following community and ecosystem files:
+
+```
+zsh-skill/
+├── CHANGELOG.md                          # Project history (Keep a Changelog format)
+├── CODE_OF_CONDUCT.md                    # Contributor Covenant v2.1
+├── sources/zsh-integrations.md           # Git, Docker, CI/CD, and dev environment guide
+└── .github/
+    ├── PULL_REQUEST_TEMPLATE.md          # PR checklist presented to contributors
+    └── ISSUE_TEMPLATE/
+        ├── bug_report.yml                # Structured bug report form
+        └── feature_request.yml           # Structured feature request form
+```
+
+### CHANGELOG.md
+
+Follows the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format.
+
+**Recommendations:**
+- Record every user-visible change in `[Unreleased]` as you work. Move the section
+  to a versioned heading (`## [1.0.0] — YYYY-MM-DD`) when tagging a release.
+- Use the standard change categories: `Added`, `Changed`, `Deprecated`, `Removed`,
+  `Fixed`, `Security`.
+- Link each versioned heading to a GitHub compare URL for easy diffing.
+
+**Gotchas:**
+- Do not record internal refactors or whitespace-only commits unless they affect
+  behaviour. Changelogs are for users and contributors, not for git history.
+
+---
+
+### CODE_OF_CONDUCT.md
+
+Adopts the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).
+
+**Recommendations:**
+- Report enforcement contacts should be updated to a real email address or issue
+  tracker link before the project reaches a wider audience.
+
+---
+
+### Issue Templates
+
+Structured YAML-based GitHub issue forms in `.github/ISSUE_TEMPLATE/`:
+
+| File | Purpose |
+|------|---------|
+| `bug_report.yml` | Collects Zsh version, OS, affected file, repro steps, and expected behaviour |
+| `feature_request.yml` | Collects use case, proposed solution, and alternatives |
+
+**Recommendations:**
+- Add a `config.yml` to `.github/ISSUE_TEMPLATE/` if you want to add a link to
+  discussions or a contact link, or to disable blank issues:
+  ```yaml
+  # .github/ISSUE_TEMPLATE/config.yml
+  blank_issues_enabled: false
+  contact_links:
+    - name: "💬 Ask a question"
+      url: https://github.com/jordantrizz/zsh-skill/discussions
+      about: "Use Discussions for questions and general help"
+  ```
+
+**Gotchas:**
+- GitHub renders YAML issue forms only on github.com. If you add `config.yml`
+  with `blank_issues_enabled: false`, contributors will not be able to open
+  freeform issues — ensure the templates cover all common issue types first.
+
+---
+
+### Pull Request Template
+
+`.github/PULL_REQUEST_TEMPLATE.md` is automatically pre-filled into the PR
+description when a contributor opens a new pull request.
+
+**Recommendations:**
+- Keep the checklist short (under 15 items). Long templates are often left
+  unchecked by contributors.
+- Mirror the checklist in `CONTRIBUTING.md` so both documents stay in sync.
+
+---
+
+### sources/zsh-integrations.md
+
+Covers integration of Zsh scripts into common development workflows:
+
+1. **Git** — pre-commit hook, commit-msg hook, git aliases
+2. **Docker** — development container, single-script runner, multi-version Compose setup
+3. **CI/CD** — GitHub Actions, GitLab CI, Jenkins
+4. **Development environments** — VS Code/Cursor tasks, Dev Containers, Makefile
+
+**Recommendations:**
+- When adding new integrations, follow the pattern: show the config/script, then
+  provide a "Build and run" or "Install" command, then add a "Gotchas" callout.
+- Link back to `sources/zsh-security.md` for any integration that involves
+  credentials or elevated permissions.
+
+**Gotchas:**
+- Git hooks live in `.git/hooks/` which is **not** tracked by version control.
+  Document how to install hooks in `CONTRIBUTING.md` and consider adding a
+  setup script (`scripts/install-hooks.zsh`) that contributors can run once.
+- Docker `RUN` instructions use `/bin/sh` by default. When running Zsh scripts
+  inside a `RUN` instruction, invoke them explicitly:
+  ```dockerfile
+  RUN zsh my-script.zsh
+  ```
+  or change the shell for the entire stage:
+  ```dockerfile
+  SHELL ["/usr/bin/zsh", "-c"]
+  ```
+- ShellSpec's `--format junit` output goes to stdout. Redirect it to a file
+  (`> report.xml`) after the normal run; running with JUnit format suppresses
+  human-readable output, making local debugging harder.
+
+---
+
 ## 🔗 Related Documents
 
 - [README.md](README.md) — Project overview and quick start
@@ -626,7 +745,10 @@ secure coding templates, and a pre-deployment security checklist.
 - [tests/README.md](tests/README.md) — Test suite documentation
 - [sources/zsh-best-practices.md](sources/zsh-best-practices.md) — Coding standards
 - [sources/zsh-troubleshooting.md](sources/zsh-troubleshooting.md) — Debugging techniques
-- [sources/zsh-claude-guide.md](sources/claude-guide.md) — Claude AI integration guide
+- [sources/claude-guide.md](sources/claude-guide.md) — Claude AI integration guide
+- [sources/zsh-integrations.md](sources/zsh-integrations.md) — Git, Docker, CI/CD, and dev environment integration
+- [CHANGELOG.md](CHANGELOG.md) — Project history
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Community standards
 - [sources/zsh-faq.md](sources/zsh-faq.md) — Frequently asked questions
 - [sources/zsh-version-compatibility.md](sources/zsh-version-compatibility.md) — Version matrix and migration guides
 - [sources/zsh-performance.md](sources/zsh-performance.md) — Performance benchmarking and optimisation

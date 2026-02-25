@@ -21,6 +21,14 @@ Describe 'required top-level files'
   It 'CONTRIBUTING.md exists'
     The file "${SHELLSPEC_SPECDIR}/../CONTRIBUTING.md" should be exist
   End
+
+  It 'CHANGELOG.md exists'
+    The file "${SHELLSPEC_SPECDIR}/../CHANGELOG.md" should be exist
+  End
+
+  It 'CODE_OF_CONDUCT.md exists'
+    The file "${SHELLSPEC_SPECDIR}/../CODE_OF_CONDUCT.md" should be exist
+  End
 End
 
 Describe 'required sources/ documents'
@@ -62,6 +70,10 @@ Describe 'required sources/ documents'
 
   It 'sources/zsh-security.md exists'
     The file "${SHELLSPEC_SPECDIR}/../sources/zsh-security.md" should be exist
+  End
+
+  It 'sources/zsh-integrations.md exists'
+    The file "${SHELLSPEC_SPECDIR}/../sources/zsh-integrations.md" should be exist
   End
 End
 

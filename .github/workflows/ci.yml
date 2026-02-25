@@ -68,6 +68,8 @@ jobs:
             BUILD.md
             AGENTS.md
             CONTRIBUTING.md
+            CHANGELOG.md
+            CODE_OF_CONDUCT.md
             sources/zsh-basics.md
             sources/zsh-advanced.md
             sources/zsh-best-practices.md
@@ -75,6 +77,7 @@ jobs:
             sources/zsh-troubleshooting.md
             sources/zsh-ecosystem.md
             sources/zsh-reference.md
+            sources/zsh-integrations.md
           )
           missing=0
           for f in "${required_files[@]}"; do
