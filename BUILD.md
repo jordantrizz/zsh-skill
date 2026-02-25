@@ -736,6 +736,98 @@ Covers integration of Zsh scripts into common development workflows:
 
 ---
 
+## 🔄 Phase 8: Maintenance & Updates
+
+Phase 8 establishes the ongoing processes that keep the repository accurate, relevant, and
+community-driven after the initial build phases are complete.
+
+---
+
+### Regular Updates
+
+**Recommendations:**
+- Schedule a **quarterly documentation review** — pick one calendar quarter-start (e.g. the
+  first Monday of January, April, July, October) to skim every file in `sources/` for
+  outdated version references, broken links, or stale examples.
+- When a new Zsh minor version ships, add its notable changes to
+  `sources/zsh-version-compatibility.md` and update the version matrix table.  Open a
+  dedicated issue titled `Quarterly review — QN YYYY` to track the work.
+- When updating best-practice recommendations (e.g. preferred quoting style, a new builtin
+  that replaces a common external command), **also** update the corresponding prompt
+  templates in `prompts/` and the example scripts in `examples/` so all surfaces stay
+  consistent.
+- After updating any `sources/` file referenced by an AI platform config (`.cursorrules`,
+  `.github/copilot/copilot-instructions.md`, `sources/claude-guide.md`), review the config
+  to ensure examples and file paths are still accurate.
+
+**Gotchas:**
+- Zsh version numbers follow a `MAJOR.MINOR.PATCH` pattern (`5.9.0`).  The CI matrix in
+  `.github/workflows/ci.yml` pins a specific version; bump it alongside documentation
+  updates so the tests actually exercise the documented version.
+- `is-at-least` (from `zsh/compinit`) is the canonical guard for version-specific features.
+  Do **not** use string comparisons like `[[ $ZSH_VERSION > "5.9" ]]` — lexicographic
+  ordering gives wrong results for double-digit minor versions (e.g. `5.10`).
+- HTML comment semantic tags (`<!-- semantic-tags: ... -->`) in source files are invisible
+  in rendered markdown.  Review them during quarterly passes — they accumulate stale tags
+  after section renames.
+
+---
+
+### Community Feedback
+
+**Recommendations:**
+- Add a `## Feedback` section to `README.md` pointing contributors to GitHub Discussions
+  for general questions and GitHub Issues (using the structured templates in
+  `.github/ISSUE_TEMPLATE/`) for bug reports and feature requests.
+- During quarterly reviews, triage open issues: close stale ones (no response in 90 days),
+  label recurring themes (e.g. `documentation`, `examples`, `ai-integration`), and promote
+  popular requests to the `TODO.md` roadmap.
+- When a community contribution is merged, add the contributor to the `## Contributors`
+  section of `README.md` (or use the all-contributors bot if the project grows).
+- Collect success stories (e.g. "this knowledge base helped me write X") in a
+  `TESTIMONIALS.md` or a pinned GitHub Discussion — they provide motivation for maintainers
+  and social proof for new users.
+
+**Gotchas:**
+- GitHub Discussions must be **enabled** in the repository settings before any links to
+  `github.com/jordantrizz/zsh-skill/discussions` will work.  Verify this before advertising
+  the Discussions URL.
+- The YAML issue templates in `.github/ISSUE_TEMPLATE/` render only on github.com — they
+  display as plain YAML in other interfaces (e.g. the GitHub mobile app's plain issue
+  form).  Keep template descriptions brief enough to be useful even when unrendered.
+- If `blank_issues_enabled: false` is set in `.github/ISSUE_TEMPLATE/config.yml`,
+  contributors **cannot** open freeform issues at all — ensure the structured templates
+  cover every common scenario before enabling this restriction.
+
+---
+
+### Analytics & Improvement
+
+**Recommendations:**
+- Use **GitHub Insights** (Traffic → Popular content) to identify which `sources/` pages
+  are viewed most — these are the highest-leverage targets for quality improvements.
+- Track common questions by reviewing Discussions and issues monthly, tagging recurring
+  topics.  Recurring questions that are not answered by any existing document indicate a
+  documentation gap — open a `documentation gap` issue for each one.
+- Monitor AI assistant effectiveness indirectly: if users report that Copilot / Claude /
+  Cursor gives wrong Zsh advice in issues or discussions, note the pattern and add a
+  counter-example or clarification to the relevant `sources/` file.
+- Add a `## Known Limitations` section to `AGENTS.md` listing constructs or scenarios
+  where current AI platforms are known to give suboptimal Zsh suggestions, so users know
+  what to verify manually.
+
+**Gotchas:**
+- GitHub's built-in traffic data has a **14-day rolling window** — export it regularly
+  (or use a third-party analytics integration) if you want long-term trends.
+- "AI assistant effectiveness" is inherently hard to measure quantitatively in an open
+  repository.  Proxy metrics (issue close time, PR quality, repeat contributors) are more
+  actionable than trying to instrument AI completions directly.
+- Do not add client-side tracking (e.g. Google Analytics snippets) to markdown files — AI
+  models will include the tracking code in their training and may reproduce it in generated
+  scripts.
+
+---
+
 ## 🔗 Related Documents
 
 - [README.md](README.md) — Project overview and quick start
@@ -757,4 +849,4 @@ Covers integration of Zsh scripts into common development workflows:
 
 ---
 
-**Last Updated:** 2026-02-25
+**Last Updated:** 2026-02-25 (Phase 8 added)

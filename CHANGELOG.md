@@ -9,6 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Phase 8: Maintenance & Updates
+  - `BUILD.md` — Phase 8 section with recommendations and gotchas for regular updates,
+    community feedback, and analytics & improvement
 - Phase 7: Community & Ecosystem
   - `CHANGELOG.md` — this file
   - `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
