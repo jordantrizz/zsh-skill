@@ -525,6 +525,98 @@ Source documents in `sources/` follow these conventions for optimal AI parsing:
 
 ---
 
+## 🚀 Phase 6: Advanced Features
+
+Three new source documents cover the Phase 6 topics.
+
+### `sources/zsh-version-compatibility.md`
+
+Covers the version compatibility matrix, Zsh 5.x feature highlights, Zsh 5.9+
+additions (`private` keyword, `WARN_NESTED_VAR`, `TYPESET_SILENT`), and
+migration guides for Bash → Zsh and across Zsh minor versions.
+
+**Recommendations:**
+- Use `autoload -Uz is-at-least` (provided by `zsh/compinit`) for portable
+  version guards; avoid manual string parsing of `$ZSH_VERSION`.
+- Guard 5.9+ features with `is-at-least 5.9` and provide a `local`-based
+  fallback for older environments.
+- Document the minimum version requirement in every script's header comment.
+
+**Gotchas:**
+- `is-at-least` is part of the completion system (`autoload -Uz is-at-least`).
+  It is **not** available until `autoload` is called; do not rely on it before
+  completion initialisation.
+- `${ZSH_VERSION%%.*}` gives only the major version (e.g., `5`). To extract
+  the minor version you need `${${ZSH_VERSION#*.}%%.*}`.
+- `zmodload zsh/param/private` silently fails on pre-5.9 systems; always
+  guard the `zmodload` call with `is-at-least 5.9`.
+
+---
+
+### `sources/zsh-performance.md`
+
+Covers performance benchmarking (`zsh/zprof`, `$EPOCHREALTIME`), ten
+optimisation techniques, side-by-side comparison examples, and patterns for
+profiling startup time and identifying subshell anti-patterns.
+
+**Recommendations:**
+- Use `zsh/zprof` for function-level profiling; use `$EPOCHREALTIME` for
+  wall-clock benchmarks of specific blocks.
+- Replace the most common performance regressions first:
+  1. `$(cat file)` → `$(<file)`
+  2. `$(echo … | tr …)` → `${(U)var}` / `${(L)var}`
+  3. `$(basename …)` → `${path:t}`
+  4. Subshell `$(wc -l …)` inside loops → array size `${#lines}`
+- Profile `.zshrc` startup with `zprof` after every significant plugin change.
+
+**Gotchas:**
+- `zmodload zsh/zprof` **must** be the very first statement in `~/.zshrc` (or
+  the script under test). Loading it after other code gives incomplete results.
+- `$EPOCHREALTIME` requires `zmodload zsh/datetime`. It is a floating-point
+  scalar; use `local -F` to declare receiving variables to avoid truncation.
+- Micro-benchmarks inside a tight loop may be skewed by CPU frequency scaling
+  and OS scheduling. Run benchmarks under realistic load conditions and average
+  many iterations.
+- `$(command)` inside a `for` loop is the single most common Zsh performance
+  regression. Flag it during code review.
+
+---
+
+### `sources/zsh-security.md`
+
+Covers the full security lifecycle: input validation, quoting, `eval` avoidance,
+secure temporary files, `PATH` hardening, `IFS` protection, `umask` usage,
+secret handling, seven common vulnerability classes with fix examples, two
+secure coding templates, and a pre-deployment security checklist.
+
+**Recommendations:**
+- Treat all data that crosses a trust boundary (user input, environment
+  variables, file contents, network responses) as untrusted.
+- Use `:A` (absolute path with symlink resolution) whenever validating that a
+  user-supplied path stays within an allowed directory.
+- Prefer `${(P)varname}` over `eval "echo \$$varname"` for indirect variable
+  expansion; it does not execute arbitrary code.
+- Add the security checklist to your PR template so reviewers explicitly sign
+  off on each item for scripts that handle credentials or elevated privileges.
+
+**Gotchas:**
+- `setopt ERR_EXIT` alone is not a security measure — it only aborts on
+  unexpected errors. Validation of untrusted data must be explicit.
+- The `[[ =~ ]]` regex operator in Zsh does **not** anchor the pattern by
+  default. Always include `^` and `$` anchors when validating full-string
+  inputs (e.g., `[[ "$input" =~ '^[0-9]+$' ]]`).
+- `eval` with `${(P)var}` is **not** the same as using `${(P)var}` directly.
+  `${(P)var}` expands to the *value* of the variable named by `$var`; it never
+  executes code, making it safe for indirect lookups.
+- Calling `unset secret` removes the variable from the current scope but does
+  not guarantee the value is zeroed in memory. For high-security environments,
+  consider using a dedicated secrets manager rather than shell variables.
+- `mktemp` behaviour differs slightly between Linux (`-p DIR`) and macOS
+  (`-d`). Use `mktemp` without platform-specific flags for portability, and
+  always capture the output: `tmp=$(mktemp) || exit 1`.
+
+---
+
 ## 🔗 Related Documents
 
 - [README.md](README.md) — Project overview and quick start
@@ -534,10 +626,13 @@ Source documents in `sources/` follow these conventions for optimal AI parsing:
 - [tests/README.md](tests/README.md) — Test suite documentation
 - [sources/zsh-best-practices.md](sources/zsh-best-practices.md) — Coding standards
 - [sources/zsh-troubleshooting.md](sources/zsh-troubleshooting.md) — Debugging techniques
-- [sources/claude-guide.md](sources/claude-guide.md) — Claude AI integration guide
+- [sources/zsh-claude-guide.md](sources/claude-guide.md) — Claude AI integration guide
 - [sources/zsh-faq.md](sources/zsh-faq.md) — Frequently asked questions
+- [sources/zsh-version-compatibility.md](sources/zsh-version-compatibility.md) — Version matrix and migration guides
+- [sources/zsh-performance.md](sources/zsh-performance.md) — Performance benchmarking and optimisation
+- [sources/zsh-security.md](sources/zsh-security.md) — Security best practices and checklist
 - [prompts/README.md](prompts/README.md) — Prompt template usage guide
 
 ---
 
-**Last Updated:** 2026-02-23
+**Last Updated:** 2026-02-25
