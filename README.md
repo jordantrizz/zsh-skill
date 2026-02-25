@@ -19,6 +19,12 @@ Comprehensive Zsh documentation organized by topic:
 - **[AGENTS.md](AGENTS.md)** - Comprehensive guide for integrating with various AI platforms
 - **[TODO.md](TODO.md)** - Development roadmap and planned enhancements
 
+### Community & Ecosystem
+- **[CHANGELOG.md](CHANGELOG.md)** - Project history and release notes
+- **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)** - Community standards and enforcement guidelines
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guide, code style, and PR process
+- **[sources/zsh-integrations.md](sources/zsh-integrations.md)** - Git, Docker, CI/CD, and dev environment integration examples
+
 ## 🤖 Supported AI Platforms
 
 This knowledge base works with:
@@ -102,11 +108,15 @@ Using the Zsh best practices guide, review this script for improvements:
 
 ## 📋 Development Roadmap
 
-See [TODO.md](TODO.md) for detailed development phases. Current focus:
+See [TODO.md](TODO.md) for detailed development phases. Current status:
 - ✅ Phase 1: Foundation (Complete)
-- 🚀 Phase 2: Content Enhancement (In Progress)
+- ✅ Phase 2: Content Enhancement (Complete)
+- ✅ Phase 4: Testing & Quality (Complete)
+- ✅ Phase 5: AI Integration (Complete)
+- ✅ Phase 6: Advanced Features (Complete)
+- ✅ Phase 7: Community & Ecosystem (Complete)
 - 📅 Phase 3: Interactive Components
-- 📅 Phase 4: Testing & Quality
+- 📅 Phase 8: Maintenance & Updates
 
 ## 🔄 Repository Name Consideration
 

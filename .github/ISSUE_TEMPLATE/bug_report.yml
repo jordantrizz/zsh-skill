@@ -1,0 +1,76 @@
+name: Bug Report
+description: Report an incorrect script, broken example, or documentation error
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the sections below.
+
+  - type: input
+    id: zsh_version
+    attributes:
+      label: Zsh Version
+      description: Output of `zsh --version`
+      placeholder: "zsh 5.9 (x86_64-apple-darwin23.0)"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+      placeholder: "macOS 14 / Ubuntu 22.04 / Arch Linux"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - "sources/ (documentation)"
+        - "examples/ (example scripts)"
+        - "tests/ (test suite)"
+        - "prompts/ (prompt templates)"
+        - "CI / GitHub Actions"
+        - "Other"
+    validations:
+      required: true
+
+  - type: input
+    id: file
+    attributes:
+      label: Affected File(s)
+      placeholder: "sources/zsh-best-practices.md, examples/basic/hello_world.zsh"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: What is wrong? Include the exact error message or unexpected behaviour.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Run `zsh examples/basic/hello_world.zsh`
+        2. Observe output ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other information, screenshots, or environment details.
