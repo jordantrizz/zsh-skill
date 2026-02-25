@@ -1,0 +1,6 @@
+# Run specs with Zsh for native Zsh support
+# https://github.com/shellspec/shellspec
+--shell zsh
+--format documentation
+--helperdir tests
+--default-path tests

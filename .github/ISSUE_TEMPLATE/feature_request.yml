@@ -1,0 +1,51 @@
+name: Feature Request
+description: Suggest new content, examples, documentation, or tooling improvements
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Please describe what you'd like to see added.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "sources/ (new documentation topic)"
+        - "examples/ (new example script)"
+        - "prompts/ (new prompt template)"
+        - "tests/ (new or improved test)"
+        - "CI / GitHub Actions"
+        - "AI platform integration"
+        - "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Use Case / Motivation
+      description: Why is this useful? What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution
+      description: Describe what you'd like to see added or changed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any other approaches you thought of?
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Links, examples from other projects, or any other relevant details.

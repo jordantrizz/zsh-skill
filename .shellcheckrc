@@ -1,0 +1,39 @@
+# .shellcheckrc — ShellCheck configuration for zsh-skill
+#
+# ShellCheck has no Zsh dialect. We analyse .zsh files with --shell=bash as
+# the closest available target. The codes below are excluded because they
+# flag valid Zsh-specific syntax that has no Bash equivalent.
+#
+# Reference: https://www.shellcheck.net/wiki/
+
+# Zsh parameter flag expansions: ${(U)var}, ${(L)var}, ${(o)array}, etc.
+disable=SC2296
+
+# ${array[@]} embedded in a string is valid in Zsh (no word-splitting needed)
+disable=SC2145
+
+# `local` is valid outside functions in Zsh (behaves like a normal declaration)
+disable=SC2168
+
+# Zsh glob qualifiers: *(.), *(om), etc. confuse ShellCheck's parser
+disable=SC1036
+disable=SC1073
+disable=SC1083
+disable=SC1072
+disable=SC1009
+
+# `&;` (background + continue) is valid Zsh async syntax
+disable=SC1045
+
+# $pipestatus is the Zsh lowercase equivalent of Bash's $PIPESTATUS
+disable=SC2154
+
+# Zsh associative array access: $hash[key] is valid Zsh syntax
+disable=SC1087
+disable=SC2128
+
+# Parse errors caused by Zsh-specific constructs (e.g. `return }`, anonymous funcs)
+disable=SC1056
+
+# `"${(@k)hash}"` is valid Zsh key-expansion; ShellCheck treats it as a single string
+disable=SC2066
