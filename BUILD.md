@@ -197,7 +197,7 @@ tools/
 
 Before opening a PR, confirm:
 
-- [ ] `shellspec` passes with no failures
+- [ ] `shellspec tests/` passes with no failures
 - [ ] Scripts execute without errors under `zsh -o ERR_EXIT -o NO_UNSET`
 - [ ] No hardcoded absolute paths (use `$SCRIPT_DIR` or `$HOME` variables)
 - [ ] Variables are quoted: `"$var"`, not `$var`
@@ -322,11 +322,8 @@ tests/
 ### Running the Tests
 
 ```bash
-# All suites (uses .shellspec config for defaults)
-shellspec
-
-# Explicit shell and directory
-shellspec --shell zsh tests/
+# All suites
+shellspec tests/
 
 # Single subdirectory
 shellspec --shell zsh tests/unit/

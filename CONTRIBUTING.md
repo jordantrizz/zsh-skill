@@ -64,7 +64,7 @@ brew install shellspec                                         # macOS
 
 ```bash
 # Run the full test suite
-shellspec
+shellspec tests/
 
 # Run a specific suite
 shellspec --shell zsh tests/unit/
@@ -106,7 +106,7 @@ automatically on every push and pull request.
 
 Before opening a PR, confirm **all** of the following:
 
-- [ ] `shellspec` passes with no failures
+- [ ] `shellspec tests/` passes with no failures
 - [ ] All `.zsh` files have a `#!/usr/bin/env zsh` shebang
 - [ ] New scripts include a `Description:` and `Usage:` comment header
 - [ ] Variables are quoted (`"$var"`)

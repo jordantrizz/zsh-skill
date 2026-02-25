@@ -4,8 +4,5 @@
 # Run specs with Zsh for native Zsh support
 shell: zsh
 
-# Spec directory
-specdir: tests
-
 # Default format
 format: documentation

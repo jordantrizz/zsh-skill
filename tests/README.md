@@ -61,7 +61,7 @@ brew install zsh             # macOS
 ### Run All Tests
 
 ```bash
-shellspec
+shellspec tests/
 ```
 
 ### Run a Specific Suite
