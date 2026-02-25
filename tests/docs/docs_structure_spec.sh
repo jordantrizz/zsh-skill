@@ -51,6 +51,18 @@ Describe 'required sources/ documents'
   It 'sources/zsh-reference.md exists'
     The file "${SHELLSPEC_SPECDIR}/../sources/zsh-reference.md" should be exist
   End
+
+  It 'sources/zsh-version-compatibility.md exists'
+    The file "${SHELLSPEC_SPECDIR}/../sources/zsh-version-compatibility.md" should be exist
+  End
+
+  It 'sources/zsh-performance.md exists'
+    The file "${SHELLSPEC_SPECDIR}/../sources/zsh-performance.md" should be exist
+  End
+
+  It 'sources/zsh-security.md exists'
+    The file "${SHELLSPEC_SPECDIR}/../sources/zsh-security.md" should be exist
+  End
 End
 
 Describe 'required examples/ directories'
