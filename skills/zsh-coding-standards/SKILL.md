@@ -1,3 +1,8 @@
+---
+name: zsh-coding-standards
+description: Provides coding standards, best practices, and review guidelines for writing, reviewing, and refactoring Zsh scripts. Use for Zsh script generation, code review, refactoring, or debugging tasks.
+---
+
 # Zsh Coding Standards Skill
 
 Version: 1.0.0
